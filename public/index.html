@@ -1,0 +1,1287 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Apito Final Garcia Aj — Análise de Apostas Desportivas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#EEF1EA;
+    --bg-elev:#FFFFFF;
+    --bg-sunken:#E3E8DE;
+    --text:#111A15;
+    --text-muted:#57685D;
+    --border:rgba(17,26,21,0.12);
+    --pitch:#1F5C41;
+    --pitch-deep:#123B29;
+    --amber:#C97A1A;
+    --amber-strong:#A5620F;
+    --danger:#B3413A;
+    --good:#1F5C41;
+    --card-shadow:none;
+  }
+  :root:not([data-theme="light"]){
+    @media (prefers-color-scheme: dark){
+      --bg:#0D1512;
+      --bg-elev:#132019;
+      --bg-sunken:#0A100D;
+      --text:#F1F0E6;
+      --text-muted:#95A69B;
+      --border:rgba(241,240,230,0.12);
+      --pitch:#3E9B6F;
+      --pitch-deep:#173628;
+      --amber:#E8A33D;
+      --amber-strong:#F2B65C;
+      --danger:#E27168;
+      --good:#3E9B6F;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0D1512;
+    --bg-elev:#132019;
+    --bg-sunken:#0A100D;
+    --text:#F1F0E6;
+    --text-muted:#95A69B;
+    --border:rgba(241,240,230,0.12);
+    --pitch:#3E9B6F;
+    --pitch-deep:#173628;
+    --amber:#E8A33D;
+    --amber-strong:#F2B65C;
+    --danger:#E27168;
+    --good:#3E9B6F;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Inter',system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+    transition:background .25s ease;
+  }
+  h1,h2,h3,.num,.oswald{
+    font-family:'Oswald',system-ui,sans-serif;
+    letter-spacing:.01em;
+  }
+
+  /* ---------- Layout shell ---------- */
+  .shell{max-width:1040px;margin:0 auto;padding:0 20px 80px;}
+
+  header.top{
+    background:linear-gradient(180deg,var(--pitch-deep),var(--pitch));
+    color:#F1F0E6;
+    padding:28px 20px 0;
+    border-bottom:4px solid var(--amber);
+  }
+  .top-inner{max-width:1040px;margin:0 auto;}
+  .brand{display:flex;align-items:baseline;gap:10px;}
+  .brand .mark{
+    width:34px;height:34px;border-radius:50%;
+    background:var(--amber);
+    display:inline-flex;align-items:center;justify-content:center;
+    font-family:'Oswald';font-weight:700;color:var(--pitch-deep);font-size:16px;
+    flex:none;
+  }
+  .brand h1{font-size:26px;margin:0;font-weight:700;color:#F1F0E6;}
+  .subhead{font-size:14px;color:#C9D8CD;margin:6px 0 14px;max-width:62ch;line-height:1.5;}
+  .data-status{
+    display:inline-flex;align-items:center;gap:6px;
+    font-size:11.5px;font-family:'Oswald';letter-spacing:.02em;
+    padding:4px 10px;border-radius:20px;margin-bottom:16px;
+    background:rgba(241,240,230,.08);color:#C9D8CD;
+  }
+  .data-status.live{background:rgba(62,155,111,.18);color:#9EE6BC;}
+  .data-status.live::before{content:"●";color:#3E9B6F;}
+  .data-status.offline{background:rgba(226,113,104,.15);color:#F3B6AF;}
+  .data-status.offline::before{content:"●";color:#E27168;}
+
+  nav.tabs{display:flex;gap:2px;overflow-x:auto;}
+  nav.tabs button{
+    appearance:none;border:none;background:transparent;
+    color:#C9D8CD;
+    font-family:'Oswald';font-size:14px;font-weight:500;
+    padding:12px 18px 14px;
+    cursor:pointer;
+    border-bottom:3px solid transparent;
+    transition:color .15s ease,border-color .15s ease;
+    white-space:nowrap;
+  }
+  nav.tabs button:hover{color:#F1F0E6;}
+  nav.tabs button.active{color:#F1F0E6;border-color:var(--amber);}
+
+  main{padding-top:26px;}
+  section.view{display:none;}
+  section.view.active{display:block;animation:fade .35s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:none;}}
+
+  .view-head{margin-bottom:18px;}
+  .view-head h2{font-size:22px;margin:0 0 6px;}
+  .view-head p{margin:0;color:var(--text-muted);font-size:14px;line-height:1.6;max-width:68ch;}
+
+  .notice{
+    border:1px solid var(--border);
+    background:var(--bg-sunken);
+    border-radius:6px;
+    padding:12px 14px;
+    font-size:12.5px;
+    color:var(--text-muted);
+    line-height:1.55;
+    margin:16px 0 20px;
+  }
+  .notice strong{color:var(--text);}
+
+  /* ---------- Calendário (Prognósticos Geral) ---------- */
+  .calendar-row{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin-bottom:14px;}
+  .cal-btn, .pill-multi{
+    flex:none;font-family:'Oswald';font-size:12.5px;font-weight:500;
+    padding:9px 14px;border-radius:20px;border:1px solid var(--border);
+    background:var(--bg-elev);color:var(--text-muted);cursor:pointer;
+    white-space:nowrap;transition:all .15s ease;
+  }
+  .cal-btn:hover, .pill-multi:hover{border-color:var(--amber);}
+  .cal-btn.active, .pill-multi.active{background:var(--pitch);border-color:var(--pitch);color:#F1F0E6;}
+
+  /* ---------- Barra de filtros (Geral + Aposta Manual) ---------- */
+  .filter-bar{
+    display:flex;flex-wrap:wrap;gap:14px;align-items:flex-start;
+    background:var(--bg-elev);border:1px solid var(--border);border-radius:8px;
+    padding:14px 16px;margin-bottom:20px;
+  }
+  .filter-group{display:flex;flex-direction:column;gap:8px;min-width:200px;}
+  .filter-group.grow{flex:1;min-width:220px;}
+  .filter-group label{font-size:11px;font-family:'Oswald';color:var(--text-muted);letter-spacing:.02em;text-transform:uppercase;}
+  .filter-hint{font-weight:400;text-transform:none;color:var(--text-muted);font-size:10.5px;letter-spacing:0;}
+  .pill-group{display:flex;flex-wrap:wrap;gap:6px;}
+  .filter-group input[type=range]{accent-color:var(--pitch);width:100%;margin-top:6px;}
+
+  /* ---------- Sub-menus (Aposta Simples: Automática / Manual) ---------- */
+  .subtabs{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;}
+  .subtab-btn{
+    font-family:'Oswald';font-size:13px;font-weight:500;
+    padding:9px 16px;border-radius:20px;border:1px solid var(--border);
+    background:var(--bg-elev);color:var(--text-muted);cursor:pointer;
+  }
+  .subtab-btn:hover{border-color:var(--amber);}
+  .subtab-btn.active{background:var(--pitch);border-color:var(--pitch);color:#F1F0E6;}
+
+  .mode-toggle{display:flex;gap:8px;}
+  .mode-btn{
+    font-family:'Oswald';font-size:12px;font-weight:500;
+    padding:7px 13px;border-radius:16px;border:1px solid var(--border);
+    background:var(--bg-sunken);color:var(--text-muted);cursor:pointer;
+  }
+  .mode-btn.active{background:var(--amber);border-color:var(--amber);color:#1A1200;}
+
+  /* ---------- Caixa de número de jogos ---------- */
+  .qty-box{
+    display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+    background:var(--bg-elev);border:1px solid var(--border);border-radius:8px;
+    padding:14px 16px;margin-bottom:20px;
+  }
+  .qty-box label{font-family:'Oswald';font-size:14px;font-weight:500;}
+  .qty-box input[type=number]{
+    width:90px;padding:8px 10px;border-radius:6px;border:1px solid var(--border);
+    background:var(--bg-sunken);color:var(--text);font-size:15px;font-family:'Oswald';
+    text-align:center;
+  }
+  .qty-hint{font-size:12px;color:var(--text-muted);}
+  .auto-tag{
+    font-size:10.5px;font-family:'Oswald';font-weight:500;letter-spacing:.02em;
+    background:rgba(31,92,65,.12);color:var(--good);border:1px solid rgba(31,92,65,.3);
+    padding:2px 8px;border-radius:20px;
+  }
+
+  /* ---------- Calendário mensal ---------- */
+  .cal-btn.cal-open{border-style:dashed;color:var(--text);}
+  .cal-panel{
+    display:none;background:var(--bg-elev);border:1px solid var(--border);border-radius:8px;
+    padding:14px 16px;margin-bottom:16px;max-width:360px;
+  }
+  .cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+  .cal-head strong{font-family:'Oswald';font-size:15px;font-weight:500;}
+  .cal-nav{
+    width:30px;height:30px;border-radius:50%;border:1px solid var(--border);
+    background:var(--bg-sunken);color:var(--text);cursor:pointer;font-size:14px;
+  }
+  .cal-nav:hover{border-color:var(--amber);}
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
+  .cal-dow{font-size:10.5px;color:var(--text-muted);text-align:center;font-family:'Oswald';padding-bottom:4px;}
+  .cal-cell{
+    position:relative;aspect-ratio:1/1;border-radius:6px;border:1px solid transparent;
+    background:transparent;color:var(--text-muted);font-size:13px;font-family:'Inter';
+    cursor:pointer;padding:0;
+  }
+  .cal-cell.blank{cursor:default;}
+  .cal-cell:not(.blank):hover{border-color:var(--amber);}
+  .cal-cell.has{color:var(--text);font-weight:600;background:var(--bg-sunken);}
+  .cal-cell.has i{
+    position:absolute;right:3px;bottom:2px;font-style:normal;font-size:9px;
+    font-family:'Oswald';color:var(--good);
+  }
+  .cal-cell.today{border-color:var(--amber);}
+  .cal-cell.sel{background:var(--pitch);border-color:var(--pitch);color:#F1F0E6;}
+  .cal-cell.sel i{color:#F1F0E6;}
+  .cal-foot{display:flex;justify-content:space-between;align-items:center;margin-top:10px;font-size:11.5px;color:var(--text-muted);}
+
+  /* ---------- Seleção múltipla (ligas / tipos de aposta) ---------- */
+  .ms{position:relative;}
+  .ms summary{
+    list-style:none;cursor:pointer;padding:9px 30px 9px 10px;border-radius:6px;
+    border:1px solid var(--border);background:var(--bg-sunken);color:var(--text);
+    font-size:13.5px;position:relative;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .ms summary::-webkit-details-marker{display:none;}
+  .ms summary::after{content:"▾";position:absolute;right:10px;top:50%;transform:translateY(-50%);color:var(--text-muted);}
+  .ms[open] summary{border-color:var(--amber);}
+  .ms-panel{
+    position:absolute;z-index:20;left:0;top:calc(100% + 4px);min-width:100%;width:max-content;max-width:min(340px,86vw);
+    background:var(--bg-elev);border:1px solid var(--border);border-radius:8px;padding:10px;
+    box-shadow:0 8px 24px rgba(0,0,0,.18);
+  }
+  .ms-search{
+    width:100%;padding:8px 10px;border-radius:6px;border:1px solid var(--border);
+    background:var(--bg-sunken);color:var(--text);font-size:13px;margin-bottom:8px;
+  }
+  .ms-list{max-height:260px;overflow-y:auto;display:flex;flex-direction:column;gap:2px;}
+  .ms-opt{display:flex;align-items:center;gap:8px;padding:6px 6px;border-radius:5px;font-size:13px;cursor:pointer;}
+  .ms-opt:hover{background:var(--bg-sunken);}
+  .ms-opt input{accent-color:var(--pitch);width:16px;height:16px;flex:none;}
+  .ms-clear{
+    margin-top:8px;width:100%;padding:7px;border-radius:6px;border:1px solid var(--border);
+    background:transparent;color:var(--text-muted);font-family:'Oswald';font-size:12px;cursor:pointer;
+  }
+  .ms-clear:hover{border-color:var(--danger);color:var(--danger);}
+
+  .summary-line{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
+    font-size:12.5px;color:var(--text-muted);margin:-6px 0 14px;
+  }
+  .summary-line b{color:var(--text);}
+  .pick-caption{
+    font-family:'Oswald';font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;
+    color:var(--text-muted);margin-bottom:5px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+  }
+  .type-tag{
+    text-transform:none;letter-spacing:0;font-size:10.5px;border:1px solid var(--border);
+    border-radius:20px;padding:1px 8px;color:var(--text-muted);
+  }
+  .more-wrap{text-align:center;margin:18px 0 0;}
+
+  /* ---------- Match card (Prognósticos Geral) ---------- */
+  .grid{display:grid;grid-template-columns:1fr;gap:14px;}
+  .mcard{
+    background:var(--bg-elev);
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:16px 18px;
+  }
+  .mcard .meta{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-muted);margin-bottom:8px;}
+  .mcard .meta .flag{font-size:15px;}
+  .mcard .teams{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+  .mcard .teams h3{font-size:19px;margin:0;font-weight:500;}
+  .mcard .teams .vs{color:var(--text-muted);font-size:13px;margin:0 4px;}
+  .mcard .kickoff{font-size:12px;color:var(--text-muted);white-space:nowrap;}
+
+  .consensus{margin-top:14px;}
+  .consensus-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;gap:10px;}
+  .consensus-row .pick{font-size:14px;font-weight:600;}
+  .consensus-row .pct{font-family:'Oswald';font-size:15px;color:var(--good);white-space:nowrap;}
+  .bar{height:6px;border-radius:3px;background:var(--bg-sunken);overflow:hidden;}
+  .bar > span{display:block;height:100%;background:linear-gradient(90deg,var(--amber),var(--good));}
+
+  .sources{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;}
+  .src-chip{
+    font-size:11.5px;border:1px solid var(--border);border-radius:20px;
+    padding:4px 10px;color:var(--text-muted);
+  }
+  .src-chip b{color:var(--text);font-weight:600;}
+
+  /* ---------- Aposta Simples / Manual (linhas de jogo) ---------- */
+  .pick-row{
+    background:var(--bg-elev);border:1px solid var(--border);border-radius:8px;
+    padding:14px 16px;display:flex;align-items:center;gap:14px;margin-bottom:10px;
+  }
+  .pick-row input[type=checkbox]{
+    width:19px;height:19px;accent-color:var(--pitch);flex:none;cursor:pointer;
+  }
+  .pick-row .code{
+    font-family:'Oswald';font-size:11.5px;font-weight:600;
+    background:var(--bg-sunken);border:1px solid var(--border);
+    padding:3px 8px;border-radius:4px;color:var(--text-muted);flex:none;
+  }
+  .pick-row .info{flex:1;min-width:0;}
+  .pick-row .match{font-size:13px;color:var(--text-muted);margin-bottom:2px;}
+  .pick-row .sel{font-size:14.5px;font-weight:600;}
+  .pick-row .odd-conf{text-align:right;flex:none;}
+  .pick-row .odd{font-family:'Oswald';font-size:18px;color:var(--amber-strong);}
+  .pick-row .conf{font-size:11px;color:var(--text-muted);}
+
+  .slip-bar{
+    position:sticky;bottom:0;left:0;right:0;
+    background:var(--pitch-deep);color:#F1F0E6;
+    border-top:3px solid var(--amber);
+    margin:20px -20px 0;padding:14px 20px;
+    display:flex;flex-wrap:wrap;align-items:center;gap:16px;
+  }
+  .slip-bar .stat{font-size:12px;color:#C9D8CD;}
+  .slip-bar .stat b{display:block;font-family:'Oswald';font-size:19px;color:#F1F0E6;}
+  .slip-bar .stake-wrap{display:flex;align-items:center;gap:8px;margin-left:auto;}
+  .slip-bar input[type=number]{
+    width:100px;padding:8px 10px;border-radius:6px;border:1px solid rgba(241,240,230,.25);
+    background:rgba(241,240,230,.08);color:#F1F0E6;font-size:14px;
+  }
+  .slip-bar .ret{font-family:'Oswald';font-size:19px;color:var(--amber);}
+
+  /* ---------- Aposta Construída ---------- */
+  .build-card{background:var(--bg-elev);border:1px solid var(--border);border-radius:8px;padding:16px 18px;margin-bottom:14px;}
+  .build-card .teams h3{font-size:18px;margin:8px 0 12px;font-weight:500;}
+  .markets{display:flex;flex-direction:column;gap:8px;}
+  .market{
+    display:flex;align-items:center;gap:10px;
+    border:1px solid var(--border);border-radius:6px;padding:9px 12px;
+  }
+  .market .mlabel{flex:1;font-size:13.5px;}
+  .market .modd{font-family:'Oswald';font-size:14.5px;color:var(--amber-strong);flex:none;}
+  .build-foot{
+    display:flex;align-items:center;justify-content:space-between;
+    margin-top:12px;padding-top:12px;border-top:1px dashed var(--border);
+    flex-wrap:wrap;gap:10px;
+  }
+  .combo-odd{font-size:13px;color:var(--text-muted);}
+  .combo-odd b{font-family:'Oswald';color:var(--good);font-size:16px;}
+  .btn{
+    appearance:none;border:none;border-radius:6px;padding:9px 16px;
+    font-family:'Oswald';font-size:13px;font-weight:500;cursor:pointer;
+    background:var(--pitch);color:#F1F0E6;transition:background .15s;
+  }
+  .btn:hover{background:var(--pitch-deep);}
+  .btn.ghost{background:transparent;border:1px solid var(--border);color:var(--text-muted);}
+  .btn.ghost:hover{border-color:var(--danger);color:var(--danger);}
+  .btn:disabled{opacity:.45;cursor:not-allowed;}
+
+  .final-slip{background:var(--bg-sunken);border:1px solid var(--border);border-radius:8px;padding:16px 18px;margin-top:22px;}
+  .final-slip h3{font-size:15px;margin:0 0 12px;}
+  .final-row{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;
+  }
+  .final-row:last-of-type{border-bottom:none;}
+  .final-row .fmatch{font-weight:600;}
+  .final-row .flist{color:var(--text-muted);font-size:12px;}
+  .final-row .fodd{font-family:'Oswald';color:var(--amber-strong);white-space:nowrap;}
+  .empty{color:var(--text-muted);font-size:13px;padding:14px 0;text-align:center;}
+
+  footer.app-foot{margin-top:40px;padding-top:18px;border-top:1px solid var(--border);font-size:11.5px;color:var(--text-muted);line-height:1.7;text-align:center;}
+
+  @media (max-width:560px){
+    .brand h1{font-size:21px;}
+    .mcard .teams h3{font-size:16.5px;}
+    .slip-bar{flex-direction:column;align-items:stretch;}
+    .slip-bar .stake-wrap{margin-left:0;justify-content:space-between;}
+    .filter-group{min-width:130px;}
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <div class="brand">
+      <span class="mark">AF</span>
+      <h1>Apito Final Garcia Aj</h1>
+    </div>
+    <p class="subhead">Consenso automático de várias casas de apostas. Filtre por dia, liga, tipo de aposta ou confiança — os melhores prognósticos são escolhidos pela aplicação.</p>
+    <div id="data-status" class="data-status">a verificar ligação aos dados...</div>
+    <nav class="tabs">
+      <button class="tab-btn active" data-view="geral">Prognósticos Geral</button>
+      <button class="tab-btn" data-view="simples">Aposta Simples</button>
+      <button class="tab-btn" data-view="construida">Aposta Construída</button>
+    </nav>
+  </div>
+</header>
+
+<main class="shell">
+
+  <!-- ================= MENU 1: PROGNÓSTICOS GERAL ================= -->
+  <section class="view active" id="view-geral">
+    <div class="view-head">
+      <h2>Prognósticos Geral</h2>
+      <p>Escolha uma data no calendário, uma ou mais ligas e um ou mais tipos de aposta. Cada jogo mostra o código com maior probabilidade de acerto, segundo a média de várias casas de apostas.</p>
+    </div>
+    <div class="notice"><strong>Nota:</strong> quando o servidor tem uma chave de API de odds configurada, os jogos são dados reais. Sem chave, mostra dados de exemplo. Alguns tipos de aposta (cantos, handicap asiático, intervalo/final) só aparecem nos dados de exemplo — a API gratuita usada não os fornece ao vivo.</div>
+
+    <div class="calendar-row" id="calendar-row"></div>
+    <div class="cal-panel" id="cal-panel"></div>
+
+    <div class="filter-bar">
+      <div class="filter-group">
+        <label>Liga <span class="filter-hint">(pode escolher mais de uma)</span></label>
+        <div id="ms-league"></div>
+      </div>
+      <div class="filter-group">
+        <label>Tipo de aposta <span class="filter-hint">(pode escolher mais de um)</span></label>
+        <div id="ms-type"></div>
+      </div>
+      <div class="filter-group grow">
+        <label for="filter-conf">Confiança mínima: <span id="filter-conf-val">0%</span></label>
+        <input type="range" id="filter-conf" min="0" max="99" step="1" value="0">
+      </div>
+    </div>
+
+    <div class="summary-line" id="geral-summary"></div>
+    <div class="grid" id="geral-grid"></div>
+  </section>
+
+  <!-- ================= MENU 2: APOSTA SIMPLES ================= -->
+  <section class="view" id="view-simples">
+    <div class="view-head">
+      <h2>Aposta Simples</h2>
+      <p>Escolha entre gerar o bilhete automaticamente ou filtrar e montar você mesmo, com os jogos que cumprem os critérios que escolher.</p>
+    </div>
+
+    <div class="subtabs">
+      <button class="subtab-btn active" data-sub="auto">Aposta Automática</button>
+      <button class="subtab-btn" data-sub="manual">Aposta Manual</button>
+    </div>
+
+    <!-- ---- Sub-menu: Automática ---- -->
+    <div class="subview" id="simples-auto">
+      <div class="qty-box" style="flex-direction:column;align-items:stretch;gap:12px;">
+        <div class="mode-toggle">
+          <button type="button" class="mode-btn active" data-mode="qty">Por número de jogos</button>
+          <button type="button" class="mode-btn" data-mode="odd">Por odd combinada desejada</button>
+        </div>
+        <div id="auto-qty-row" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+          <label for="simple-qty">Número de jogos</label>
+          <input type="number" id="simple-qty" value="5" min="5" max="12">
+          <span class="qty-hint">mínimo 5 jogos</span>
+        </div>
+        <div id="auto-odd-row" style="display:none;align-items:center;gap:12px;flex-wrap:wrap;">
+          <label for="simple-target-odd">Odd combinada desejada</label>
+          <input type="number" id="simple-target-odd" value="5" min="1.5" step="0.5">
+          <span class="qty-hint">a app junta jogos, do mais confiável ao menos, até atingir este valor</span>
+        </div>
+      </div>
+      <div id="simples-list"></div>
+    </div>
+
+    <!-- ---- Sub-menu: Manual ---- -->
+    <div class="subview" id="simples-manual" style="display:none;">
+      <div class="filter-bar">
+        <div class="filter-group">
+          <label>Liga <span class="filter-hint">(pode escolher mais de uma)</span></label>
+          <div id="ms-league-manual"></div>
+        </div>
+        <div class="filter-group">
+          <label>Tipo de aposta <span class="filter-hint">(pode escolher mais de um)</span></label>
+          <div id="ms-type-manual"></div>
+        </div>
+        <div class="filter-group grow">
+          <label for="manual-conf">Confiança mínima: <span id="manual-conf-val">0%</span></label>
+          <input type="range" id="manual-conf" min="0" max="99" step="1" value="0">
+        </div>
+      </div>
+      <div id="manual-list"></div>
+      <div class="slip-bar" id="manual-slip-bar" style="margin:16px 0 0;border-radius:6px;">
+        <div class="stat">Jogos selecionados<b id="manual-count">0</b></div>
+        <div class="stat">Odd combinada<b id="manual-odd">0.00</b></div>
+        <div class="stake-wrap">
+          <span style="font-size:12px;color:#C9D8CD;">Aposta (Kz)</span>
+          <input type="number" id="manual-stake" value="1000" min="0" step="100">
+        </div>
+        <div class="stat">Retorno potencial<b class="ret" id="manual-return">0</b></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= MENU 3: APOSTA CONSTRUÍDA ================= -->
+  <section class="view" id="view-construida">
+    <div class="view-head">
+      <h2>Aposta Construída</h2>
+      <p>Só entram aqui jogos com confiança geral de 85% ou mais. Dentro desses jogos, qualquer tipo de código pode ser usado na combinação, mas cada mercado individual só é adicionado se tiver 95% ou mais de confiança sozinho.</p>
+    </div>
+    <div class="notice"><strong>Regra de confiança:</strong> jogo elegível ⇒ confiança geral ≥ 85%. Mercado incluído na combinação ⇒ confiança individual desse mercado ≥ 95%. Isto significa que nem sempre haverá muitos jogos disponíveis — é intencional, para manter o bilhete o mais seguro possível.</div>
+    <div class="qty-box">
+      <label for="build-qty">Número de jogos</label>
+      <input type="number" id="build-qty" value="3" min="1" max="12">
+      <span class="qty-hint" id="build-qty-hint">de 0 jogos qualificados (confiança ≥ 85%)</span>
+    </div>
+    <div id="construida-list"></div>
+    <div class="final-slip">
+      <h3>Bilhete final</h3>
+      <div id="final-rows"></div>
+      <div class="slip-bar" id="final-slip-bar" style="margin:16px 0 0;border-radius:6px;">
+        <div class="stat">Jogos no bilhete<b id="final-count">0</b></div>
+        <div class="stat">Odd combinada<b id="final-odd">0.00</b></div>
+        <div class="stake-wrap">
+          <span style="font-size:12px;color:#C9D8CD;">Aposta (Kz)</span>
+          <input type="number" id="final-stake" value="1000" min="0" step="100">
+        </div>
+        <div class="stat">Retorno potencial<b class="ret" id="final-return">0</b></div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="app-foot">
+    Apito Final é uma demonstração. As odds e percentagens são exemplos e não constituem aconselhamento financeiro nem garantia de resultado.<br>
+    Aposte com responsabilidade e apenas valores que pode perder.
+  </footer>
+</main>
+
+<script>
+/* ==================================================================
+   DADOS DE EXEMPLO
+   ================================================================== */
+const HOUSES = ["Bet365","Betano","Bwin","1xBet"];
+
+// Dados de reserva: usados apenas se o servidor não conseguir contactar
+// a API de odds (por exemplo, sem chave configurada ou sem internet).
+// "dayOffset" (0 a 5) distribui os jogos pelos próximos 6 dias a contar
+// de hoje, para o calendário funcionar mesmo em modo de exemplo.
+const FALLBACK_MATCHES = [
+  { id:"BAR-RMA", country:"Espanha", flag:"🇪🇸", league:"La Liga", home:"FC Barcelona", away:"Real Madrid", kickoff:"20 Set, 20:00", dayOffset:0,
+    markets:[
+      { id:"1", label:"Barcelona vence (1)", odds:[1.85,1.90,1.88,1.92] },
+      { id:"2", label:"Mais de 1.5 golos", odds:[1.20,1.22,1.19,1.21] },
+      { id:"3", label:"Mais de 7.5 cantos", odds:[1.75,1.80,1.78,1.82] },
+      { id:"4", label:"Ambas marcam - Sim", odds:[1.55,1.60,1.58,1.57] },
+      { id:"5", label:"Handicap Asiático Barcelona -1", odds:[1.95,1.98,1.92,2.00] },
+      { id:"6", label:"Resultado ao Intervalo: Empate", odds:[2.40,2.45,2.38,2.42] },
+    ] },
+  { id:"MCI-ARS", country:"Inglaterra", flag:"🏴", league:"Premier League", home:"Man City", away:"Arsenal", kickoff:"20 Set, 17:30", dayOffset:0,
+    markets:[
+      { id:"1", label:"Man City vence (1)", odds:[1.95,2.00,1.98,1.97] },
+      { id:"2", label:"Mais de 2.5 golos", odds:[1.65,1.68,1.62,1.66] },
+      { id:"3", label:"Mais de 8.5 cantos", odds:[1.70,1.72,1.69,1.74] },
+      { id:"4", label:"Ambas marcam - Sim", odds:[1.50,1.52,1.48,1.53] },
+      { id:"5", label:"Handicap Asiático Man City -0.5", odds:[1.80,1.85,1.78,1.82] },
+    ] },
+  { id:"PET-SAG", country:"Angola", flag:"🇦🇴", league:"Girabola", home:"Petro de Luanda", away:"Sagrada Esperança", kickoff:"21 Set, 15:00", dayOffset:1,
+    markets:[
+      { id:"1", label:"Petro de Luanda vence (1)", odds:[1.08,1.10,1.09,1.11] },
+      { id:"x", label:"Empate (X)", odds:[6.80,7.00,7.20,7.10] },
+      { id:"2", label:"Sagrada Esperança vence (2)", odds:[19.00,20.00,21.00,20.50] },
+      { id:"3", label:"Menos de 2.5 golos", odds:[1.60,1.58,1.62,1.61] },
+      { id:"4", label:"Petro de Luanda +0.5 primeiro tempo", odds:[1.90,1.95,1.88,1.92] },
+    ] },
+  { id:"BEN-POR", country:"Portugal", flag:"🇵🇹", league:"Liga Portugal", home:"Benfica", away:"FC Porto", kickoff:"21 Set, 20:30", dayOffset:1,
+    markets:[
+      { id:"1", label:"Empate (X)", odds:[3.30,3.40,3.25,3.35] },
+      { id:"2", label:"Mais de 2.5 golos", odds:[1.90,1.92,1.88,1.95] },
+      { id:"3", label:"Ambas marcam - Sim", odds:[1.62,1.65,1.60,1.63] },
+      { id:"4", label:"Mais de 9.5 cantos", odds:[1.80,1.85,1.78,1.82] },
+      { id:"5", label:"Resultado Intervalo/Final: Empate/Benfica", odds:[3.80,3.75,3.90,3.85] },
+    ] },
+  { id:"INT-MIL", country:"Itália", flag:"🇮🇹", league:"Serie A", home:"Inter de Milão", away:"AC Milan", kickoff:"22 Set, 19:45", dayOffset:2,
+    markets:[
+      { id:"1", label:"Inter de Milão vence (1)", odds:[2.05,2.10,2.08,2.06] },
+      { id:"2", label:"Menos de 3.5 golos", odds:[1.40,1.42,1.38,1.41] },
+      { id:"3", label:"Ambas marcam - Sim", odds:[1.70,1.72,1.68,1.71] },
+    ] },
+  { id:"BAY-DOR", country:"Alemanha", flag:"🇩🇪", league:"Bundesliga", home:"Bayern de Munique", away:"Borussia Dortmund", kickoff:"22 Set, 17:30", dayOffset:2,
+    markets:[
+      { id:"1", label:"Bayern de Munique vence (1)", odds:[1.55,1.58,1.56,1.60] },
+      { id:"2", label:"Mais de 3.5 golos", odds:[1.75,1.78,1.72,1.76] },
+      { id:"3", label:"Mais de 9.5 cantos", odds:[1.85,1.88,1.82,1.90] },
+    ] },
+  { id:"PSG-MAR", country:"França", flag:"🇫🇷", league:"Ligue 1", home:"Paris Saint-Germain", away:"Olympique Marselha", kickoff:"23 Set, 20:00", dayOffset:3,
+    markets:[
+      { id:"1", label:"PSG vence (1)", odds:[1.07,1.09,1.06,1.10] },
+      { id:"x", label:"Empate (X)", odds:[6.80,7.20,7.00,7.10] },
+      { id:"2", label:"Olympique Marselha vence (2)", odds:[19.00,21.00,20.00,20.50] },
+      { id:"3", label:"Mais de 2.5 golos", odds:[1.55,1.58,1.52,1.56] },
+      { id:"4", label:"PSG marca +1.5 golos", odds:[1.90,1.92,1.88,1.95] },
+    ] },
+  { id:"FLA-PAL", country:"Brasil", flag:"🇧🇷", league:"Brasileirão", home:"Flamengo", away:"Palmeiras", kickoff:"23 Set, 22:30", dayOffset:3,
+    markets:[
+      { id:"1", label:"Flamengo vence (1)", odds:[2.15,2.20,2.10,2.18] },
+      { id:"2", label:"Ambas marcam - Sim", odds:[1.68,1.70,1.65,1.72] },
+      { id:"3", label:"Mais de 8.5 cantos", odds:[1.78,1.80,1.75,1.82] },
+    ] },
+  { id:"MCI-PSG", country:"Europa", flag:"🇪🇺", league:"Liga dos Campeões (UEFA)", home:"Man City", away:"PSG", kickoff:"24 Set, 20:00", dayOffset:4,
+    markets:[
+      { id:"1", label:"Man City vence (1)", odds:[1.90,1.95,1.92,1.93] },
+      { id:"2", label:"Mais de 2.5 golos", odds:[1.60,1.62,1.58,1.61] },
+      { id:"3", label:"Ambas marcam - Sim", odds:[1.65,1.68,1.63,1.66] },
+    ] },
+  { id:"RIV-PAL", country:"América do Sul", flag:"🌎", league:"Copa Libertadores", home:"River Plate", away:"Palmeiras", kickoff:"25 Set, 21:30", dayOffset:4,
+    markets:[
+      { id:"1", label:"River Plate vence (1)", odds:[2.30,2.35,2.25,2.32] },
+      { id:"2", label:"Menos de 2.5 golos", odds:[1.75,1.78,1.72,1.76] },
+      { id:"3", label:"Ambas marcam - Não", odds:[1.90,1.92,1.88,1.95] },
+    ] },
+  { id:"NGA-GHA", country:"África", flag:"🌍", league:"CAN — Taça Africana das Nações", home:"Nigéria", away:"Gana", kickoff:"26 Set, 18:00", dayOffset:5,
+    markets:[
+      { id:"1", label:"Nigéria vence (1)", odds:[2.05,2.10,2.02,2.08] },
+      { id:"x", label:"Empate (X)", odds:[3.10,3.05,3.15,3.20] },
+      { id:"2", label:"Gana vence (2)", odds:[3.60,3.55,3.65,3.70] },
+    ] },
+  { id:"USA-MEX", country:"Mundial", flag:"🌐", league:"Qualificação Mundial — CONCACAF", home:"Estados Unidos", away:"México", kickoff:"27 Set, 23:00", dayOffset:5,
+    markets:[
+      { id:"1", label:"Estados Unidos vence (1)", odds:[2.20,2.25,2.15,2.22] },
+      { id:"2", label:"México vence (2)", odds:[3.20,3.15,3.25,3.10] },
+      { id:"3", label:"Mais de 2.5 golos", odds:[2.00,1.95,2.05,1.98] },
+    ] },
+];
+
+/* ==================================================================
+   UTILIDADES
+   ================================================================== */
+const avg = arr => arr.reduce((a,b)=>a+b,0)/arr.length;
+const fmtOdd = n => n.toFixed(2);
+const impliedConf = odd => Math.round(100/odd);
+
+function topMarket(match){
+  // menor odd média = maior consenso/confiança
+  return match.markets.reduce((best,m)=>{
+    const a = avg(m.odds);
+    return (!best || a < avg(best.odds)) ? m : best;
+  }, null);
+}
+
+// ordena todos os jogos do mais confiável (odd média mais baixa) para o menos confiável
+function rankedMatches(){
+  return [...MATCHES].sort((a,b)=> avg(topMarket(a).odds) - avg(topMarket(b).odds));
+}
+
+/* ---------------- Os 7 tipos de aposta mais usados ---------------- */
+const BET_TYPES = [
+  { id:'1x2',               label:'1X2 — Vencedor do Jogo' },
+  { id:'dupla_hipotese',    label:'Dupla Hipótese' },
+  { id:'over_under',        label:'Mais/Menos de Golos' },
+  { id:'ambas_marcam',      label:'Ambas as Equipas Marcam' },
+  { id:'handicap_asiatico', label:'Handicap Asiático' },
+  { id:'cantos',            label:'Total de Cantos' },
+  { id:'intervalo_final',   label:'Resultado Intervalo/Final' },
+];
+
+function classifyMarketType(label){
+  const l = label.toLowerCase();
+  if(l.includes('dupla hipótese')) return 'dupla_hipotese';
+  if(l.includes('canto')) return 'cantos';
+  if(l.includes('ambas marcam') || l.includes('ambas as equipas')) return 'ambas_marcam';
+  if(l.includes('handicap')) return 'handicap_asiatico';
+  if(l.includes('intervalo')) return 'intervalo_final';
+  if(l.includes('golos')) return 'over_under';
+  if(l.includes('vence') || l.includes('empate')) return '1x2';
+  return 'outro';
+}
+
+// Deriva odds "justas" de Dupla Hipótese a partir do mercado 1X2 completo,
+// removendo a margem das casas de apostas (overround) antes de combinar.
+function deriveDoubleChance(match, home, draw, away){
+  const rawHome = 1/avg(home.odds), rawDraw = 1/avg(draw.odds), rawAway = 1/avg(away.odds);
+  const overround = rawHome + rawDraw + rawAway;
+  const fHome = rawHome/overround, fDraw = rawDraw/overround, fAway = rawAway/overround;
+  return [
+    { id:'dc-1x', label:`Dupla Hipótese: ${match.home} ou Empate`, odds:[ 1/(fHome+fDraw) ] },
+    { id:'dc-12', label:`Dupla Hipótese: ${match.home} ou ${match.away}`, odds:[ 1/(fHome+fAway) ] },
+    { id:'dc-x2', label:`Dupla Hipótese: Empate ou ${match.away}`, odds:[ 1/(fDraw+fAway) ] },
+  ];
+}
+
+function dayKey(d){
+  const dt = new Date(d);
+  return `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;
+}
+
+// Prepara os jogos: define a data real de cada um, classifica os mercados
+// por tipo e adiciona a Dupla Hipótese quando o 1X2 completo está disponível.
+function enrichMatches(matches){
+  const today = new Date(); today.setHours(0,0,0,0);
+  matches.forEach(m=>{
+    if(!m.date){
+      const offset = (typeof m.dayOffset === 'number') ? m.dayOffset : 0;
+      const d = new Date(today); d.setDate(d.getDate()+offset);
+      m.date = d.toISOString();
+    }
+    m.markets.forEach(mk=>{ mk.type = classifyMarketType(mk.label); });
+
+    const home = m.markets.find(mk=>mk.label.includes('(1)'));
+    const draw = m.markets.find(mk=>mk.label.includes('(X)') || /^Empate/i.test(mk.label));
+    const away = m.markets.find(mk=>mk.label.includes('(2)'));
+    if(home && draw && away && !m.markets.some(mk=>mk.type==='dupla_hipotese')){
+      const dc = deriveDoubleChance(m, home, draw, away);
+      dc.forEach(mk=> mk.type = 'dupla_hipotese');
+      m.markets.push(...dc);
+    }
+  });
+  return matches;
+}
+
+// MATCHES é o que a app realmente usa para desenhar os menus.
+let MATCHES = enrichMatches(FALLBACK_MATCHES);
+
+// Aceita um valor único ('all', 'La Liga'...), uma lista ou um Set.
+// Conjunto vazio = sem filtro.
+function toSet(x){
+  if(x instanceof Set) return x;
+  if(Array.isArray(x)) return new Set(x);
+  if(typeof x === 'string' && x && x !== 'all') return new Set([x]);
+  return new Set();
+}
+
+// Devolve o mercado mais provável do jogo dentro dos tipos escolhidos
+// (um ou mais). Sem tipos escolhidos, devolve o mais provável em geral.
+function pickForMatchByType(match, typeFilter){
+  const types = toSet(typeFilter);
+  if(types.size === 0) return topMarket(match);
+  const candidates = match.markets.filter(mk=>types.has(mk.type));
+  if(candidates.length===0) return null;
+  return candidates.reduce((best,mk)=> (!best || avg(mk.odds)<avg(best.odds)) ? mk : best, null);
+}
+
+// Filtro combinado: dia (opcional), ligas (uma ou mais), tipos de aposta
+// (um ou mais) e confiança mínima.
+function filterMatches(matches, { day, league, type, minConf }){
+  const leagues = toSet(league);
+  return matches.map(m=>{
+    if(leagues.size && !leagues.has(m.league)) return null;
+    if(day && day!=='all' && dayKey(m.date)!==day) return null;
+    const pick = pickForMatchByType(m, type);
+    if(!pick) return null;
+    const conf = impliedConf(avg(pick.odds));
+    if(conf < (minConf||0)) return null;
+    return { match:m, pick, conf };
+  }).filter(Boolean);
+}
+
+function sourceChipsHtml(market){
+  if(market.odds.length === HOUSES.length){
+    return market.odds.map((o,i)=>`<span class="src-chip">${HOUSES[i]} <b>${fmtOdd(o)}</b></span>`).join('');
+  }
+  return `<span class="src-chip">Odd justa estimada <b>${fmtOdd(avg(market.odds))}</b></span>`;
+}
+
+function betTypeLabel(typeId){
+  const t = BET_TYPES.find(x=>x.id===typeId);
+  return t ? t.label : 'Outro';
+}
+
+// ---------------------------------------------------------------
+// Componente de seleção múltipla (usado para Liga e Tipo de aposta).
+// Monta um <details> com pesquisa e checkboxes dentro de containerId.
+// selectedSet é um Set mutado diretamente; onChange é chamado a cada alteração.
+// ---------------------------------------------------------------
+function renderMultiSelect(containerId, items, selectedSet, placeholderText, onChange){
+  const el = document.getElementById(containerId);
+  if(!el) return;
+
+  function summaryText(){
+    if(selectedSet.size===0) return placeholderText;
+    if(selectedSet.size===1){
+      const only = [...selectedSet][0];
+      const found = items.find(i=>i.value===only);
+      return found ? found.label : only;
+    }
+    return `${selectedSet.size} selecionados`;
+  }
+
+  el.innerHTML = `
+    <details class="ms">
+      <summary>${summaryText()}</summary>
+      <div class="ms-panel">
+        <input type="text" class="ms-search" placeholder="Pesquisar...">
+        <div class="ms-list">
+          ${items.map(it=>`
+            <label class="ms-opt">
+              <input type="checkbox" value="${String(it.value).replace(/"/g,'&quot;')}" ${selectedSet.has(it.value)?'checked':''}>
+              <span>${it.label}</span>
+            </label>`).join('')}
+        </div>
+        <button type="button" class="ms-clear">Limpar seleção</button>
+      </div>
+    </details>`;
+
+  const summaryEl = el.querySelector('summary');
+  el.querySelectorAll('.ms-opt input').forEach(cb=>{
+    cb.addEventListener('change', ()=>{
+      if(cb.checked) selectedSet.add(cb.value); else selectedSet.delete(cb.value);
+      summaryEl.textContent = summaryText();
+      onChange();
+    });
+  });
+  el.querySelector('.ms-search').addEventListener('input', (e)=>{
+    const q = e.target.value.toLowerCase();
+    el.querySelectorAll('.ms-opt').forEach(opt=>{
+      opt.style.display = opt.textContent.toLowerCase().includes(q) ? 'flex' : 'none';
+    });
+  });
+  el.querySelector('.ms-clear').addEventListener('click', ()=>{
+    selectedSet.clear();
+    renderMultiSelect(containerId, items, selectedSet, placeholderText, onChange);
+    onChange();
+  });
+  document.addEventListener('click', (e)=>{
+    const details = el.querySelector('details');
+    if(details && details.open && !el.contains(e.target)) details.removeAttribute('open');
+  });
+}
+
+/* ==================================================================
+   MENU 1: PROGNÓSTICOS GERAL — calendário + filtros
+   ================================================================== */
+let geralFilters = { day:'all', league:new Set(), type:new Set(), minConf:0 };
+let calPanelMonth = new Date();
+const WEEKDAYS = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+const MONTHS = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+
+function buildCalendarDays(){
+  const days = [];
+  const today = new Date(); today.setHours(0,0,0,0);
+  for(let i=0;i<6;i++){
+    const d = new Date(today); d.setDate(d.getDate()+i);
+    days.push(d);
+  }
+  return days;
+}
+function dayLabel(d, idx){
+  if(idx===0) return 'Hoje';
+  if(idx===1) return 'Amanhã';
+  return `${WEEKDAYS[d.getDay()]} ${d.getDate()}`;
+}
+
+function renderCalendar(){
+  const row = document.getElementById('calendar-row');
+  const days = buildCalendarDays();
+  let html = `<button type="button" class="cal-btn ${geralFilters.day==='all'?'active':''}" data-day="all">Todos os dias</button>`;
+  days.forEach((d,i)=>{
+    const key = dayKey(d);
+    html += `<button type="button" class="cal-btn ${geralFilters.day===key?'active':''}" data-day="${key}">${dayLabel(d,i)}</button>`;
+  });
+  html += `<button type="button" class="cal-btn cal-open" id="cal-toggle">📅 Mais datas</button>`;
+  row.innerHTML = html;
+
+  row.querySelectorAll('.cal-btn[data-day]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      geralFilters.day = btn.dataset.day;
+      renderCalendar();
+      renderGeral();
+    });
+  });
+  document.getElementById('cal-toggle').addEventListener('click', ()=>{
+    const panel = document.getElementById('cal-panel');
+    const isOpen = panel.style.display === 'block';
+    panel.style.display = isOpen ? 'none' : 'block';
+    if(!isOpen){ calPanelMonth = new Date(); renderCalPanel(); }
+  });
+}
+
+// Painel de calendário mensal completo — permite escolher qualquer dia do
+// mês (não só os 6 dias rápidos), e assinala com um ponto os dias que têm jogos.
+function renderCalPanel(){
+  const panel = document.getElementById('cal-panel');
+  const year = calPanelMonth.getFullYear();
+  const month = calPanelMonth.getMonth();
+  const first = new Date(year, month, 1);
+  const startWeekday = first.getDay();
+  const daysInMonth = new Date(year, month+1, 0).getDate();
+  const today = new Date(); today.setHours(0,0,0,0);
+  const todayKey = dayKey(today);
+  const matchDates = new Set(MATCHES.map(m=>dayKey(m.date)));
+
+  let cells = '';
+  for(let i=0;i<startWeekday;i++) cells += `<button type="button" class="cal-cell blank" disabled></button>`;
+  for(let d=1; d<=daysInMonth; d++){
+    const key = dayKey(new Date(year, month, d));
+    const cls = ['cal-cell'];
+    if(matchDates.has(key)) cls.push('has');
+    if(key===todayKey) cls.push('today');
+    if(key===geralFilters.day) cls.push('sel');
+    cells += `<button type="button" class="${cls.join(' ')}" data-day="${key}">${d}${matchDates.has(key)?'<i>●</i>':''}</button>`;
+  }
+
+  panel.innerHTML = `
+    <div class="cal-head">
+      <button type="button" class="cal-nav" id="cal-prev">‹</button>
+      <strong>${MONTHS[month]} ${year}</strong>
+      <button type="button" class="cal-nav" id="cal-next">›</button>
+    </div>
+    <div class="cal-grid">
+      ${WEEKDAYS.map(w=>`<div class="cal-dow">${w}</div>`).join('')}
+      ${cells}
+    </div>
+    <div class="cal-foot">
+      <span>● dias com jogos</span>
+      <button type="button" class="ms-clear" id="cal-clear-day" style="width:auto;margin:0;padding:4px 10px;">Limpar data</button>
+    </div>`;
+
+  document.getElementById('cal-prev').addEventListener('click', ()=>{
+    calPanelMonth = new Date(year, month-1, 1);
+    renderCalPanel();
+  });
+  document.getElementById('cal-next').addEventListener('click', ()=>{
+    calPanelMonth = new Date(year, month+1, 1);
+    renderCalPanel();
+  });
+  document.getElementById('cal-clear-day').addEventListener('click', ()=>{
+    geralFilters.day = 'all';
+    renderCalendar();
+    renderCalPanel();
+    renderGeral();
+  });
+  panel.querySelectorAll('.cal-cell:not(.blank)').forEach(cell=>{
+    cell.addEventListener('click', ()=>{
+      geralFilters.day = cell.dataset.day;
+      renderCalendar();
+      renderCalPanel();
+      renderGeral();
+      panel.style.display = 'none';
+    });
+  });
+}
+
+function renderGeral(){
+  const grid = document.getElementById('geral-grid');
+  const results = filterMatches(MATCHES, geralFilters);
+
+  const summaryEl = document.getElementById('geral-summary');
+  if(summaryEl){
+    const dayTxt = geralFilters.day==='all' ? 'em todos os dias disponíveis' : `no dia ${geralFilters.day.split('-').reverse().slice(0,2).join('/')}`;
+    summaryEl.innerHTML = `A mostrar <b>${results.length}</b> jogo(s) ${dayTxt}.`;
+  }
+
+  if(results.length===0){
+    grid.innerHTML = '<div class="empty">Nenhum jogo corresponde aos filtros selecionados.</div>';
+    return;
+  }
+
+  grid.innerHTML = results.map(({match:m, pick:top, conf})=>{
+    const a = avg(top.odds);
+    const chips = sourceChipsHtml(top);
+    return `
+    <div class="mcard">
+      <div class="meta"><span class="flag">${m.flag}</span> ${m.country} · ${m.league}</div>
+      <div class="teams">
+        <h3>${m.home} <span class="vs">vs</span> ${m.away}</h3>
+        <div class="kickoff">${m.kickoff}</div>
+      </div>
+      <div class="pick-caption">Código com maior probabilidade <span class="type-tag">${betTypeLabel(top.type)}</span></div>
+      <div class="consensus">
+        <div class="consensus-row">
+          <span class="pick">${top.label} <span style="color:var(--text-muted);font-weight:400;">· odd média ${fmtOdd(a)}</span></span>
+          <span class="pct">${conf}%</span>
+        </div>
+        <div class="bar"><span style="width:${Math.min(conf,100)}%"></span></div>
+      </div>
+      <div class="sources">${chips}</div>
+    </div>`;
+  }).join('');
+}
+
+function wireGeralFilters(){
+  document.getElementById('filter-conf').addEventListener('input', e=>{
+    geralFilters.minConf = parseInt(e.target.value)||0;
+    document.getElementById('filter-conf-val').textContent = geralFilters.minConf+'%';
+    renderGeral();
+  });
+}
+
+/* ==================================================================
+   MENU 2: APOSTA SIMPLES — Automática e Manual
+   ================================================================== */
+let autoMode = 'qty'; // 'qty' | 'odd'
+
+function renderPickRow(m, pick, conf, checkbox){
+  const a = avg(pick.odds);
+  return `
+    <label class="pick-row">
+      ${checkbox ? `<input type="checkbox" class="manual-check" data-id="${m.id}">` : `<span class="code">${m.id}</span>`}
+      <span class="info">
+        <div class="match">${m.flag} ${m.home} vs ${m.away} · ${m.kickoff}</div>
+        <div class="sel">${pick.label} ${checkbox ? '' : '<span class="auto-tag">automático</span>'}</div>
+      </span>
+      <span class="odd-conf">
+        <div class="odd">${fmtOdd(a)}</div>
+        <div class="conf">${conf}% confiança</div>
+      </span>
+    </label>`;
+}
+
+function renderSimplesAuto(){
+  let selected;
+
+  if(autoMode === 'qty'){
+    const qtyInput = document.getElementById('simple-qty');
+    const max = MATCHES.length;
+    qtyInput.max = max;
+    let n = parseInt(qtyInput.value) || 5;
+    n = Math.min(Math.max(n,1), max);
+    selected = rankedMatches().slice(0, n);
+  } else {
+    const targetInput = document.getElementById('simple-target-odd');
+    let target = parseFloat(targetInput.value) || 2;
+    target = Math.max(target, 1.01);
+    const ranked = rankedMatches();
+    selected = [];
+    let combined = 1;
+    for(const m of ranked){
+      if(combined >= target) break;
+      selected.push(m);
+      combined *= avg(topMarket(m).odds);
+    }
+    if(selected.length===0 && ranked.length) selected.push(ranked[0]);
+  }
+
+  const list = document.getElementById('simples-list');
+  list.innerHTML = selected.map(m=>{
+    const top = topMarket(m);
+    return renderPickRow(m, top, impliedConf(avg(top.odds)), false);
+  }).join('') + `
+    <div class="slip-bar">
+      <div class="stat">Jogos no bilhete<b id="simple-count">${selected.length}</b></div>
+      <div class="stat">Odd combinada<b id="simple-odd">0.00</b></div>
+      <div class="stake-wrap">
+        <span style="font-size:12px;color:#C9D8CD;">Aposta (Kz)</span>
+        <input type="number" id="simple-stake" value="1000" min="0" step="100">
+      </div>
+      <div class="stat">Retorno potencial<b class="ret" id="simple-return">0</b></div>
+    </div>`;
+
+  const combinedOdd = selected.reduce((acc,m)=> acc * avg(topMarket(m).odds), 1);
+  document.getElementById('simple-odd').textContent = fmtOdd(combinedOdd);
+  const updateReturn = ()=>{
+    const stake = parseFloat(document.getElementById('simple-stake').value) || 0;
+    document.getElementById('simple-return').textContent = Math.round(stake*combinedOdd).toLocaleString('pt-PT');
+  };
+  document.getElementById('simple-stake').addEventListener('input', updateReturn);
+  updateReturn();
+}
+
+let manualSelection = new Set();
+let manualFilters = { league:new Set(), type:new Set(), minConf:0 };
+let manualLastResults = [];
+
+function renderManual(){
+  const listEl = document.getElementById('manual-list');
+
+  if(manualFilters.league.size===0 || manualFilters.type.size===0){
+    listEl.innerHTML = '<div class="empty">Selecione pelo menos uma liga e um tipo de aposta acima para ver os jogos correspondentes.</div>';
+    manualLastResults = [];
+    updateManualSlip();
+    return;
+  }
+
+  const results = filterMatches(MATCHES, {
+    league: manualFilters.league, type: manualFilters.type, minConf: manualFilters.minConf,
+  });
+  manualLastResults = results;
+
+  if(results.length===0){
+    listEl.innerHTML = '<div class="empty">Nenhum jogo corresponde aos filtros selecionados.</div>';
+  } else {
+    listEl.innerHTML = results.map(({match:m, pick, conf})=>renderPickRow(m, pick, conf, true)).join('');
+    listEl.querySelectorAll('.manual-check').forEach(cb=>{
+      cb.checked = manualSelection.has(cb.dataset.id);
+      cb.addEventListener('change', e=>{
+        if(e.target.checked) manualSelection.add(e.target.dataset.id);
+        else manualSelection.delete(e.target.dataset.id);
+        updateManualSlip();
+      });
+    });
+  }
+  updateManualSlip();
+}
+
+function updateManualSlip(){
+  const selected = manualLastResults.filter(r=>manualSelection.has(r.match.id));
+  const combinedOdd = selected.reduce((acc,r)=> acc*avg(r.pick.odds), 1);
+  document.getElementById('manual-count').textContent = selected.length;
+  document.getElementById('manual-odd').textContent = selected.length ? fmtOdd(combinedOdd) : '0.00';
+  const stakeEl = document.getElementById('manual-stake');
+  const stake = parseFloat(stakeEl.value) || 0;
+  document.getElementById('manual-return').textContent = selected.length ? Math.round(stake*combinedOdd).toLocaleString('pt-PT') : '0';
+  stakeEl.oninput = updateManualSlip;
+}
+
+function wireManualFilters(){
+  document.getElementById('manual-conf').addEventListener('input', e=>{
+    manualFilters.minConf = parseInt(e.target.value)||0;
+    document.getElementById('manual-conf-val').textContent = manualFilters.minConf+'%';
+    renderManual();
+  });
+}
+
+function renderSimples(){
+  renderSimplesAuto();
+  renderManual();
+}
+
+/* ==================================================================
+   MENU 3: APOSTA CONSTRUÍDA — regras de 85% / 95%
+   ================================================================== */
+const MATCH_MIN_CONFIDENCE = 85;  // confiança geral mínima do jogo para poder participar
+const MARKET_MIN_CONFIDENCE = 95; // confiança mínima de cada mercado individual incluído
+
+function bestMarketsFor(match, count){
+  const qualifying = match.markets.filter(mk => impliedConf(avg(mk.odds)) >= MARKET_MIN_CONFIDENCE);
+  return qualifying.sort((a,b)=> avg(a.odds)-avg(b.odds)).slice(0, count);
+}
+
+function renderConstruida(){
+  const pool = rankedMatches().filter(m => impliedConf(avg(topMarket(m).odds)) >= MATCH_MIN_CONFIDENCE);
+
+  const qtyInput = document.getElementById('build-qty');
+  const max = Math.max(pool.length, 1);
+  qtyInput.max = max;
+  let n = parseInt(qtyInput.value) || 3;
+  n = Math.min(Math.max(n,1), max);
+
+  document.getElementById('build-qty-hint').textContent = `de ${pool.length} jogo(s) qualificado(s) (confiança ≥ ${MATCH_MIN_CONFIDENCE}%)`;
+
+  const candidateMatches = pool.slice(0, n);
+  const wrap = document.getElementById('construida-list');
+
+  const built = candidateMatches.map(m=>{
+    const chosenMarkets = bestMarketsFor(m, Math.min(3, m.markets.length));
+    if(chosenMarkets.length===0) return null;
+    const comboOdd = chosenMarkets.reduce((acc,mk)=> acc*avg(mk.odds), 1);
+    return { match:m, chosenMarkets, comboOdd };
+  }).filter(Boolean);
+
+  if(pool.length===0){
+    wrap.innerHTML = `<div class="empty">Neste momento nenhum jogo tem confiança geral ≥ ${MATCH_MIN_CONFIDENCE}% — volte mais tarde.</div>`;
+  } else if(built.length===0){
+    wrap.innerHTML = `<div class="empty">Há jogos com ${MATCH_MIN_CONFIDENCE}%+ de confiança geral, mas nenhum tem ainda um mercado individual com ${MARKET_MIN_CONFIDENCE}%+.</div>`;
+  } else {
+    wrap.innerHTML = built.map(b=>{
+      const m = b.match;
+      const marketsHtml = b.chosenMarkets.map(mk=>{
+        const a = avg(mk.odds);
+        return `
+        <div class="market">
+          <span class="mlabel">${mk.label} <span class="auto-tag">${impliedConf(a)}% confiança</span></span>
+          <span class="modd">${fmtOdd(a)}</span>
+        </div>`;
+      }).join('');
+      return `
+      <div class="build-card">
+        <div class="meta">${m.flag} ${m.country} · ${m.league} · ${m.kickoff}</div>
+        <div class="teams"><h3>${m.home} <span class="vs">vs</span> ${m.away}</h3></div>
+        <div class="markets">${marketsHtml}</div>
+        <div class="build-foot">
+          <div class="combo-odd">Odd combinada deste jogo <b>${fmtOdd(b.comboOdd)}</b></div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  renderFinalSlip(built);
+}
+
+function renderFinalSlip(built){
+  const rows = document.getElementById('final-rows');
+  if(built.length===0){
+    rows.innerHTML = '<div class="empty">Sem jogos elegíveis neste momento para gerar o bilhete.</div>';
+  } else {
+    rows.innerHTML = built.map(b=>{
+      const labels = b.chosenMarkets.map(mk=>mk.label).join(' + ');
+      return `
+      <div class="final-row">
+        <div>
+          <div class="fmatch">${b.match.home} vs ${b.match.away}</div>
+          <div class="flist">${labels}</div>
+        </div>
+        <span class="fodd">${fmtOdd(b.comboOdd)}</span>
+      </div>`;
+    }).join('');
+  }
+  updateFinalTotals(built);
+}
+
+function updateFinalTotals(built){
+  const combinedOdd = built.reduce((acc,b)=>acc*b.comboOdd,1);
+  document.getElementById('final-count').textContent = built.length;
+  document.getElementById('final-odd').textContent = built.length ? fmtOdd(combinedOdd) : '0.00';
+  const stakeEl = document.getElementById('final-stake');
+  const stake = parseFloat(stakeEl.value) || 0;
+  document.getElementById('final-return').textContent = built.length ? Math.round(stake*combinedOdd).toLocaleString('pt-PT') : '0';
+  stakeEl.oninput = ()=>updateFinalTotals(built);
+}
+
+/* ==================================================================
+   NAVEGAÇÃO E LIGAÇÃO DE EVENTOS
+   ================================================================== */
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('view-'+btn.dataset.view).classList.add('active');
+  });
+});
+
+document.querySelectorAll('.subtab-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.subtab-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    const sub = btn.dataset.sub;
+    document.getElementById('simples-auto').style.display = sub==='auto' ? 'block' : 'none';
+    document.getElementById('simples-manual').style.display = sub==='manual' ? 'block' : 'none';
+  });
+});
+
+document.querySelectorAll('.mode-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    autoMode = btn.dataset.mode;
+    document.getElementById('auto-qty-row').style.display = autoMode==='qty' ? 'flex' : 'none';
+    document.getElementById('auto-odd-row').style.display = autoMode==='odd' ? 'flex' : 'none';
+    renderSimplesAuto();
+  });
+});
+
+document.getElementById('simple-qty').addEventListener('input', renderSimplesAuto);
+document.getElementById('simple-target-odd').addEventListener('input', renderSimplesAuto);
+document.getElementById('build-qty').addEventListener('input', renderConstruida);
+
+wireGeralFilters();
+wireManualFilters();
+renderCalendar();
+
+/* ==================================================================
+   CARREGAMENTO DE DADOS REAIS
+   ================================================================== */
+function refreshFilterOptions(){
+  const leagues = [...new Set(MATCHES.map(m=>m.league))].sort((a,b)=>a.localeCompare(b,'pt')).map(l=>({value:l,label:l}));
+  const types = BET_TYPES.map(t=>({value:t.id,label:t.label}));
+
+  renderMultiSelect('ms-league', leagues, geralFilters.league, 'Todas as ligas', renderGeral);
+  renderMultiSelect('ms-type', types, geralFilters.type, 'Todos os tipos', renderGeral);
+  renderMultiSelect('ms-league-manual', leagues, manualFilters.league, 'Escolha uma ou mais ligas', renderManual);
+  renderMultiSelect('ms-type-manual', types, manualFilters.type, 'Escolha um ou mais tipos', renderManual);
+}
+
+async function loadData(){
+  const statusEl = document.getElementById('data-status');
+  try{
+    const res = await fetch('/api/odds');
+    const data = await res.json();
+    if(res.ok && data.matches && data.matches.length){
+      MATCHES = enrichMatches(data.matches);
+      statusEl.textContent = `Dados ao vivo · atualizado às ${new Date(data.updatedAt).toLocaleTimeString('pt-PT')}`;
+      statusEl.className = 'data-status live';
+    } else {
+      throw new Error(data.error || 'sem jogos devolvidos');
+    }
+  } catch(err){
+    MATCHES = enrichMatches(FALLBACK_MATCHES);
+    statusEl.textContent = 'Dados de exemplo (servidor sem ligação à API de odds)';
+    statusEl.className = 'data-status offline';
+  }
+  refreshFilterOptions();
+  renderGeral();
+  renderSimples();
+  renderConstruida();
+}
+
+loadData();
+</script>
+</body>
+</html>
